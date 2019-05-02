@@ -3,21 +3,13 @@
     <head>
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1"/>
-        <title>Movie Search</title>
-        <script type="application/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-        <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue"></script>
-        <script type="application/javascript" src="scripts/moviesearch.js"></script>
+        <title>Pinball</title>
+        <script type="application/javascript" src="scripts/phaser.js"></script>
+        <!-- <script type="application/javascript" src="scripts/example1.js"></script> -->
+        <script type="application/javascript" src="scripts/pinball.js"></script>
+
+
     </head>
-    <body onload="Init();">
-        <div id="app">
-        <input id="search" type="text" v-model="movie_search" :placeholder="input_placeholder"></input>
-            <select id="type" v-model="movie_type">
-                <option v-for="option in movie_type_options" :value="option.value">{{ option.text }}</option>
-            </select>
-            <button type="button" @click="MovieSearch">Search</button>
-            <ol>
-                <li v-for="item in search_results">{{ item.name }}</li>
-            </ol>
-        </div>
+    <body>
     </body>
 </html>
