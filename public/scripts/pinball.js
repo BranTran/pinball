@@ -6,7 +6,7 @@ var config = {
   physics: {
     default:'arcade',
     arcade: {
-      gravity: {y: 20},
+      gravity: {y: 500},
       debug: false
     }
   },
@@ -31,25 +31,33 @@ function preload(){
   this.load.image('wall',root+'assets/wall.png');
 }
 
+var player;
+var platforms;
+
 function create(){
-  var platforms;
 
-  this.add.image(400, 300, 'space');
+	this.add.image(400, 300, 'space');
 
-  platforms = this.physics.add.staticGroup();
-  //Center of the item (x,y)
-  platforms.create(400, 568, 'ground').setScale(2).refreshBody();
-  platforms.create(0,0,'wall');
-//  platforms.create(800,600,'wall');
-//  platforms.create(400,150,'wall');
-  var player;
-
-  player = this.physics.add.sprite(100,450,'pinball');
-
-//  player.setBounce(0.2);
-  player.setCollideWorldBounds(true);
+	platforms = this.physics.add.staticGroup();
+//Center of the item (x,y)
+	platforms.create(400, 568, 'ground').setScale(2).refreshBody();
+	platforms.create(200,16,'ground');
+	platforms.create(600,16,'ground');
+	platforms.create(16,16,'wall');
+	platforms.create(16,400,'wall');
+	platforms.create(784,16,'wall');
+	platforms.create(784,400,'wall');
+	platforms.create(716,400,'wall');
 
 
+
+
+  	player = this.physics.add.sprite(750,450,'pinball');
+
+  	player.setBounce(0.5);
+  	player.setCollideWorldBounds(true);
+
+	this.physics.add.collider(player, platforms);
 
 
 
@@ -57,6 +65,33 @@ function create(){
 
 function update(){
 
+var cursors = this.input.keyboard.createCursorKeys();
+
+
+	if(cursors.up.isDown && player.body.touching.down)
+	{
+		player.setVelocityY(-330);
+	}
+	if(cursors.left.isDown && player.body.touching.left && !player.body.touching.down)
+	{
+		console.log("we are touching left")
+		player.setVelocityY(-160);
+		player.setVelocityX(330);
+	}
+	if(cursors.right.isDown && player.body.touching.right && !player.body.touching.down)
+	{
+			console.log("we are touching left")
+			player.setVelocityY(-160);
+			player.setVelocityX(-330);
+	}
+	else if(cursors.left.isDown)
+	{
+		player.setVelocityX(-160);
+	} else if(cursors.right.isDown){
+		player.setVelocityX(160);
+	} else{
+		player.setVelocityX(0);
+	}
 }
 //
 // function Init() {
