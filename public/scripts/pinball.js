@@ -6,7 +6,7 @@ var config = {
   physics: {
     default:'arcade',
     arcade: {
-      gravity: {y: 200},
+      gravity: {y: 20},
       debug: false
     }
   },
@@ -26,8 +26,9 @@ var root = 'https://brantran.github.io/pinball/public/';
 
 function preload(){
   this.load.image('space',root+'assets/space.jpg');
-  this.load.image('pinball',root+'assets/pinball.jpg');
-  this.load.image('black-block',root+'assets/black-block.jpg');
+  this.load.image('pinball',root+'assets/pinball.png');
+  this.load.image('ground',root+'assets/platform.png');
+  this.load.image('wall',root+'assets/wall.png');
 }
 
 function create(){
@@ -36,13 +37,16 @@ function create(){
   this.add.image(400, 300, 'space');
 
   platforms = this.physics.add.staticGroup();
-  platforms.create(400, 568, 'black-block').setScale(2).refreshBody();
-
+  //Center of the item (x,y)
+  platforms.create(400, 568, 'ground').setScale(2).refreshBody();
+  platforms.create(0,0,'wall');
+//  platforms.create(800,600,'wall');
+//  platforms.create(400,150,'wall');
   var player;
 
   player = this.physics.add.sprite(100,450,'pinball');
 
-  player.setBounce(0.2);
+//  player.setBounce(0.2);
   player.setCollideWorldBounds(true);
 
 
