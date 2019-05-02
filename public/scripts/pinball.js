@@ -3,12 +3,13 @@ var config = {
   type: Phaser.AUTO,
   width: 800,
   height: 600,
-/*  physics: {
+  physics: {
     default:'arcade',
     arcade: {
-      gravity: {y_200}
+      gravity: {y: 200},
+      debug: false
     }
-  },*/
+  },
 
 //  scene:[example1]
 
@@ -21,13 +22,33 @@ var config = {
 
 var game = new Phaser.Game(config);
 
+var root = 'https://brantran.github.io/pinball/public/';
+
 function preload(){
-  this.load.image('space','assets/space.jpg');
-  this.load.image('pinball','assets/pinball.jpg')
+  this.load.image('space',root+'assets/space.jpg');
+  this.load.image('pinball',root+'assets/pinball.jpg');
+  this.load.image('black-block',root+'assets/black-block.jpg');
 }
 
 function create(){
+  var platforms;
+
   this.add.image(400, 300, 'space');
+
+  platforms = this.physics.add.staticGroup();
+  platforms.create(400, 568, 'black-block').setScale(2).refreshBody();
+
+  var player;
+
+  player = this.physics.add.sprite(100,450,'pinball');
+
+  player.setBounce(0.2);
+  player.setCollideWorldBounds(true);
+
+
+
+
+
 }
 
 function update(){
