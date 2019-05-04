@@ -29,7 +29,11 @@ var root = 'https://brantran.github.io/pinball/public/';
 
 function preload(){
   this.load.image('space',root+'assets/space.jpg');
-  this.load.image('block',root+'assets/40px_black_square');
+  this.load.image('block',root+'assets/40px_black_square.png');
+  this.load.image('LRTri',root+'assets/40px_black_LowRight_triangle.png');
+  this.load.image('URTri',root+'assets/40px_black_UpRight_triangle.png');
+  this.load.image('LLTri',root+'assets/40px_black_LowLeft_triangle.png');
+  this.load.image('ULTri',root+'assets/40px_black_UpLeft_triangle.png');
   this.load.image('pinball',root+'assets/pinball.png');
 //  this.load.image('ground',root+'assets/platform.png');
 //  this.load.image('wall',root+'assets/wall.png');
@@ -48,26 +52,25 @@ function create(){
 //CEILING AND FLOOR
   for(var x = offset; x < width; x = x+(2*offset))
   {
-    platforms.create(x,offset,'block');
-    platforms.create(x,(height-offset),'block');
+    platforms.create(x,offset,'URTri');
+    platforms.create(x,(height-offset),'LLTri');
   }
 //Walls
   for(var y = offset; y < height; y = y+(2*offset))
   {
-    platforms.create(offset,y,'block');
-    platforms.create((width-offset),y,'block');
+    platforms.create(offset,y,'ULTri');
+    if(y >= height/2 && y <= ((height/2) + offset)){
+      platforms.create((width-offset),y,'LRTri');
+    }
+    else{
+      platforms.create((width-offset),y,'block');
+    }
+
   }
-	// platforms.create(400, 568, 'ground').setScale(2).refreshBody();
-	// platforms.create(200,16,'ground');
-	// platforms.create(600,16,'ground');
-	// platforms.create(16,16,'wall');
-	// platforms.create(16,400,'wall');
-	// platforms.create(784,16,'wall');
-	// platforms.create(784,400,'wall');
-	// platforms.create(716,400,'wall');
 
 
-  	player = this.physics.add.sprite((width - 50),(height-20),'pinball');
+
+  	player = this.physics.add.sprite((width-offset),(height/2)-(offset/2),'pinball');
 
   	player.setBounce(0.5);
   	player.setCollideWorldBounds(true);
@@ -99,7 +102,8 @@ var cursors = this.input.keyboard.createCursorKeys();
 			player.setVelocityY(-160);
 			player.setVelocityX(-330);
 	}
-	else if(cursors.left.isDown)
+
+  if(cursors.left.isDown)
 	{
 		player.setVelocityX(-160);
 	} else if(cursors.right.isDown){
