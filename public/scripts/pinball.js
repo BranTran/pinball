@@ -1,8 +1,11 @@
 //var app;
+
+var width = 400;
+var height = 600;
 var config = {
   type: Phaser.AUTO,
-  width: 800,
-  height: 600,
+  width: width,
+  height: height,
   physics: {
     default:'arcade',
     arcade: {
@@ -26,33 +29,45 @@ var root = 'https://brantran.github.io/pinball/public/';
 
 function preload(){
   this.load.image('space',root+'assets/space.jpg');
+  this.load.image('block',root+'assets/40px_black_square');
   this.load.image('pinball',root+'assets/pinball.png');
-  this.load.image('ground',root+'assets/platform.png');
-  this.load.image('wall',root+'assets/wall.png');
+//  this.load.image('ground',root+'assets/platform.png');
+//  this.load.image('wall',root+'assets/wall.png');
 }
 
 var player;
 var platforms;
-
+var offset = 20;
 function create(){
 
 	this.add.image(400, 300, 'space');
 
 	platforms = this.physics.add.staticGroup();
 //Center of the item (x,y)
-	platforms.create(400, 568, 'ground').setScale(2).refreshBody();
-	platforms.create(200,16,'ground');
-	platforms.create(600,16,'ground');
-	platforms.create(16,16,'wall');
-	platforms.create(16,400,'wall');
-	platforms.create(784,16,'wall');
-	platforms.create(784,400,'wall');
-	platforms.create(716,400,'wall');
+
+//CEILING AND FLOOR
+  for(var x = offset; x < width; x = x+(2*offset))
+  {
+    platforms.create(x,offset,'block');
+    platforms.create(x,(height-offset),'block');
+  }
+//Walls
+  for(var y = offset; y < height; y = y+(2*offset))
+  {
+    platforms.create(offset,y,'block');
+    platforms.create((width-offset),y,'block');
+  }
+	// platforms.create(400, 568, 'ground').setScale(2).refreshBody();
+	// platforms.create(200,16,'ground');
+	// platforms.create(600,16,'ground');
+	// platforms.create(16,16,'wall');
+	// platforms.create(16,400,'wall');
+	// platforms.create(784,16,'wall');
+	// platforms.create(784,400,'wall');
+	// platforms.create(716,400,'wall');
 
 
-
-
-  	player = this.physics.add.sprite(750,450,'pinball');
+  	player = this.physics.add.sprite((width - 50),(height-20),'pinball');
 
   	player.setBounce(0.5);
   	player.setCollideWorldBounds(true);
