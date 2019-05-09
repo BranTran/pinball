@@ -1,7 +1,8 @@
 //var app;
 
 var width = 400;
-var height = 600;
+var height = 500;
+var gameScene = new Phaser.Scene
 var config = {
   type: Phaser.AUTO,
   width: width,
@@ -16,18 +17,14 @@ var config = {
 
 //  scene:[example1]
 
-  scene:{
-    preload: preload,
-    create: create,
-    update: update
-  }
+  scene: gameScene
 };
 
 var game = new Phaser.Game(config);
 
 var root = 'https://brantran.github.io/pinball/public/';
 
-function preload(){
+gameScene.preload = function(){
   this.load.image('space',root+'assets/space.jpg');
   this.load.image('block',root+'assets/40px_black_square.png');
   this.load.image('LRTri',root+'assets/40px_black_LowRight_triangle.png');
@@ -35,31 +32,39 @@ function preload(){
   this.load.image('LLTri',root+'assets/40px_black_LowLeft_triangle.png');
   this.load.image('ULTri',root+'assets/40px_black_UpLeft_triangle.png');
   this.load.image('pinball',root+'assets/pinball.png');
+  this.load.image('star',root+'assets/star.png');
 //  this.load.image('ground',root+'assets/platform.png');
 //  this.load.image('wall',root+'assets/wall.png');
 }
 
 var player;
 var platforms;
-var offset = 20;
-function create(){
-
-	this.add.image(400, 300, 'space');
+var offset = 0;
+var blockSize = 40;//Block is 40 px
+gameScene.create = function(){
+	this.physics.world.setBounds(0,0,width,height,true);//check down
+	//this.physics.world.setBoundCollision;
+	this.physics.world.event.on('ARCADE_WORLD_BOUNDS_EVENT', ballOut);
+	this.add.image(400, 300, 'space');//setScale(0.5)
 
 	platforms = this.physics.add.staticGroup();
+	bumpers = this.physics.add.staticGroup();
 //Center of the item (x,y)
 
 //CEILING AND FLOOR
-  for(var x = offset; x < width; x = x+(2*offset))
+  for(var x = offset; x < width; x = x+blockSize)
   {
-    platforms.create(x,offset,'URTri');
-    platforms.create(x,(height-offset),'LLTri');
+    platforms.create(x,offset,'block');//Ceiling
+    if(x < (width/3) || x > (2*width/3))
+    {//Leave a gap in the center
+	    platforms.create(x,(height-offset),'block');
+	}
   }
 //Walls
-  for(var y = offset; y < height; y = y+(2*offset))
+  for(var y = offset; y < height; y = y+(blockSize))
   {
-    platforms.create(offset,y,'ULTri');
-    if(y >= height/2 && y <= ((height/2) + offset)){
+    platforms.create(offset,y,'block');
+    if(y >= height/2 - (blockSize) && y <= ((height/2))){
       platforms.create((width-offset),y,'LRTri');
     }
     else{
@@ -68,25 +73,28 @@ function create(){
 
   }
 
+//Bumpers
 
+	bumpers.create(231,241,'star');
+	bumpers.create(50,100,'star');
 
-  	player = this.physics.add.sprite((width-offset),(height/2)-(offset/2),'pinball');
-
-  	player.setBounce(0.5);
-  	player.setCollideWorldBounds(true);
-
+//Pinball
+	player = this.physics.add.sprite((width-(blockSize/4)),(height/2)-(blockSize/2),'pinball');
+	player.checkWorldBounds = true;
+  	player.setBounce(0.8);
 	this.physics.add.collider(player, platforms);
-
+	this.physics.add.collider(player, bumpers);
+//	player.events.onOutOfBounds.add(ballOut, this);
 
 
 }
 
-function update(){
-
+gameScene.update = function(){
 var cursors = this.input.keyboard.createCursorKeys();
 
 
-	if(cursors.up.isDown && player.body.touching.down)
+//	if(cursors.up.isDown && player.body.touching.down)
+	if(cursors.up.isDown)
 	{
 		player.setVelocityY(-330);
 	}
@@ -98,12 +106,12 @@ var cursors = this.input.keyboard.createCursorKeys();
 	}
 	if(cursors.right.isDown && player.body.touching.right && !player.body.touching.down)
 	{
-			console.log("we are touching left")
+			console.log("we are touching right")
 			player.setVelocityY(-160);
 			player.setVelocityX(-330);
 	}
 
-  if(cursors.left.isDown)
+	if(cursors.left.isDown)
 	{
 		player.setVelocityX(-160);
 	} else if(cursors.right.isDown){
@@ -111,6 +119,11 @@ var cursors = this.input.keyboard.createCursorKeys();
 	} else{
 		player.setVelocityX(0);
 	}
+}
+
+function ballOut(player){
+	player.reset(player.x,player.y);
+	console.log("ball went out of bounds");
 }
 //
 // function Init() {
