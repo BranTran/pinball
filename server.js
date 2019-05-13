@@ -5,6 +5,10 @@ var express = require("express");//Don't need HTTP, FS, URL requires
 var sqlite3 = require("sqlite3");
 var WebSocket = require("ws");//The websocketing
 var md5 = require("md5");//Encrypting data
+var session = require("express-session");
+
+
+
 
 var app = express();//Create an express app
 var server = http.createServer(app);
@@ -23,8 +27,33 @@ var db = new sqlite3.Database(db_filename, sqlite3.OPEN_READONLY, (err) => {
 		//We worry about asycn issues, but in the end
 		//The chances of an issue are so small
 	}
-});//*/
+});
+
 app.use(express.static(public_dir));//Handles all of our requests
+
+
+
+app.get("/Titles", (req,res) => {//In JS $.get(/Titles, req, (data) =>{});
+        //console.log(req);
+        var req_url = url.parse(req.url);
+        //console.log(req_url);//The thing we want is the query
+        var query = decodeURI(req_url.query).replace(/\*/g, '%');;//Decode special characters " " = %20 etc.
+        //query.replace(/\*/g, "%");//Wildcard: give me everything with this in the title
+        //console.log(query);//Text that we want.
+        db.all("SELECT * FROM Titles WHERE primary_title LIKE ?", [query], (err, rows) =>{//Use ? because of SQL injection prevention
+//              Use LIKE instead of '=' because of the wildcards
+//              console.log(rows);
+                if(err){//Check if there is a error
+                        res.writeHead(500, {"Content-Type": "text/plain"});
+                        res.end();
+                }else{
+                        res.writeHead(200, {"Content-Type": "application/json"});
+                        res.write(JSON.stringify(rows));
+                        res.end();
+                }
+
+        });
+});
 
 
 
