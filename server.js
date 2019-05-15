@@ -42,50 +42,62 @@ app.get("/User", (req,res) => {//LOGIN
 });
 app.get('/login', (req,res)=>{//Login
 	var req_url = url.parse(req.url);//give username and password;
-	var splitQuery = req_url.split('|||');
+	console.log(req_url);//The thing we want is the query
+	var query = req_url.query;
+	var splitQuery = query.split("|||");
 	var username = splitQuery[0];
 	var password = splitQuery[1];
 	var password = md5(password);//Encrypt the password
-
-	//console.log(req_url);//The thing we want is the query
+	console.log("Username: "+username+" Password: "+password);
 	//var query = decodeURI(req_url.query).replace(/\*/g, '%');;//Decode special characters " " = %20 etc.
 	//query.replace(/\*/g, "%");//Wildcard: give me everything with this in the title
 	//console.log(query);//Text that we want.
-	db("SELECT "+username+" FROM users WHERE password = "+password, (err, rows) =>{//Use ? because of SQL injection prevention
-	//              Use LIKE instead of '=' because of the wildcards
-	//              console.log(rows);
-					if(err){//Check if there is a error
-									res.writeHead(500, {"Content-Type": "text/plain"});
-									res.write("Failed to have things working");
-									res.end();
-					}else{
-									res.writeHead(200, {"Content-Type": "application/json"});
-									res.write(JSON.stringify(rows));
-									res.end();
-					}
-				});
-		//console.log(req);
-});
-// app.post('/login',(req,res)=>{//NEW USER
-// 	var req_url = url.parse(req.url);
-// 	//console.log(req_url);//The thing we want is the query
-// 	var query = decodeURI(req_url.query).replace(/\*/g, '%');;//Decode special characters " " = %20 etc.
-// 	//query.replace(/\*/g, "%");//Wildcard: give me everything with this in the title
-// 	//console.log(query);//Text that we want.
-// 	db.all("SELECT * FROM users WHERE primary_title LIKE ?", [query], (err, rows) =>{//Use ? because of SQL injection prevention
-// 	//              Use LIKE instead of '=' because of the wildcards
-// 	//              console.log(rows);
-// 					if(err){//Check if there is a error
-// 									res.writeHead(500, {"Content-Type": "text/plain"});
-// 									res.end();
-// 					}else{
-// 									res.writeHead(200, {"Content-Type": "application/json"});
-// 									res.write(JSON.stringify(rows));
-// 									res.end();
-// 					}
-// 		//console.log(req);
-// });
+	console.log("SELECT * FROM users WHERE name = ?"+username);
+	db.each("SELECT * FROM users WHERE name = ?",[username], (err, row) =>{//Use ? because of SQL injection prevention
+		// Use LIKE instead of '=' because of the wildcards
+		console.log(row);
+		if(err){//Check if there is a error
+			
+			res.writeHead(500, {"Content-Type": "text/plain"});
+			res.write("Failed to have things working");
+			res.end();
+		}
+		else{
+			res.writeHead(200, {"Content-Type": "application/json"});
+			res.write(JSON.stringify(row));
+			res.end();
+		}
+	});//db
 
+
+});
+app.post('/login',(req,res)=>{//NEW USER
+	var req_url = url.parse(req.url);//give username and password;
+	console.log(req_url);//The thing we want is the query
+	var query = req_url.query;
+	var splitQuery = query.split("|||");
+	var username = splitQuery[0];
+	var password = splitQuery[1];
+	var password = md5(password);//Encrypt the password
+	console.log("Username: "+username+" Password: "+password);
+	//var query = decodeURI(req_url.query).replace(/\*/g, '%');;//Decode special characters " " = %20 etc.
+	//query.replace(/\*/g, "%");//Wildcard: give me everything with this in the title
+	//console.log(query);//Text that we want.
+	console.log("SELECT * FROM users WHERE name = ?"+username);
+	db.each("INSERT INTO users VALUES(?,?,0,0,0)",[username,password], (err, row) =>{//Use ? because of SQL injection prevention
+		// Use LIKE instead of '=' because of the wildcards
+		console.log(row);
+		if(err){//Check if there is a error
+			res.writeHead(500, {"Content-Type": "text/plain"});
+			res.write("Failed to have things working");
+			res.end();
+		}else{
+			res.writeHead(200, {"Content-Type": "application/json"});
+			res.write(JSON.stringify(row));
+			res.end();
+		}
+	});//db
+});
 
 
 

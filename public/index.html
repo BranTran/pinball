@@ -1,24 +1,78 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <link href = "stylesheet.css" type="text/css" rel="stylesheet">
-    <title>Account</title>
-    <script type="application/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue"></script>
-    <script type="application/javascript" src="scripts/clientserver.js"></script>
-  </head>
-  <body>
-    <div class = "box2">
-    <b>Username:</b>
-    <b>High Score:</b>
-    <b>Games Played:</b>
-    <div id="leaderboard" class="container">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+  <title>Account</title>
+  <link href = "stylesheet.css" type="text/css" rel="stylesheet">
+  <script type="application/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser-arcade-physics.min.js"></script>
+  <script type="application/javascript" src="scripts/clientserver.js"></script>
+</head>
+<body onload="Init();">
+  <div id="app">
+    <!-- MAIN PAGE     -->
+    <div vclass = "box2" v-if="page_type === 'main'">
+      <b>Username:</b>
+      <b>High Score:</b>
+      <b>Games Played:</b>
+      <div id="leaderboard" class="container">
         <!-- scores will be inserted by the script here -->
+        <table>
+          <tr>
+            <td> User </td>
+            <td> Score </td>
+          </tr>
+          <tr v-for="ranker in leader_board">
+            <td><span class="text-primary" :onclick="'GetName(\'/names/'+ranker.name+'\');'">{{ranker.name}}</span></td>
+            <td>{{ranker.score}}</td>
+          </tr>
+        </table>
+      </div>
+      <b>Change Profile Picture:</b>
+      <h1 @click="playGame">PLAY</h1>
     </div>
-    <button onclick="randomize()">Randomize</button>
-    <script src="scripts/leaderboard.js"></script>
-    <b>Change Profile Picture:</b>
-    <h1 :onclick="playGame()">PLAY</h1>
+    <!-- STATS PAGE -->
+    <div vclass = "box2" v-if="page_type === 'stats'">
+      <b>Username:{{selected_user.name}}</b>
+      <b>High Score:{{selected_user.score}}</b>
+      <b>Games Played:{{selected_user.games}}</b>
+      <button @click="playGame">PLAY</button>
     </div>
-  </body>
+    <!-- LOGIN -->
+    <div id="login" v-if="page_type === 'login'">
+      <div class = "box">
+        <h1>Galaxy Pinball</h1>
+        <a href="game.html">Game</a>
+        <b>USERNAME</b>
+        <input type="text" placeholder="Enter Username" v-model="username" name = "user" class = "user" required/>
+        <b>PASSWORD</b>
+        <input type="text" placeholder="Enter Password" v-model="password" name = "pass" class = "password" required/>
+        <button type="button" class="btn" @click="SignIn">Sign In</button>
+        <button type="button" class="btn2" @click="SignUp">Sign Up</button>
+      </div>
+    </div>
+
+    <!-- PINBALL GAME-->
+    <div id="game" v-if="page_type === 'game'">
+      <div id=pinball_game></div>
+      <h1>Pinball</h1>
+      <a href="login.html">Login</a>
+      <br/>
+      <button type="button" @click="togglePause">Pause</button>
+      <div id="interactive">
+        <div id="chat container">
+          <table id="chat">
+            <tr v-for="things in chat_messages">
+              <td>{{things.sender}}: {{things.msg}}</td>
+            </tr>
+          </table>
+          <input type="text" placeholder="Enter message..." v-model="new_message"/>
+          <button type="button" @click="SendMessage">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
 </html>

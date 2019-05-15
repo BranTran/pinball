@@ -1,6 +1,6 @@
 body{
   font-family: 'Open Sans', sans-serif;
-  background-image: url(public/assets/space.jpg);
+  /* background-image: url(assets/space.png); */
   margin: 0 auto 0 auto;
   width:100%;
   text-align:center;
@@ -96,4 +96,10 @@ b{
 
 .btn2:hover{
   background: #f4c141;
+}
+#game{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50vw;
 }

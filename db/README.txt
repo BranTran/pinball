@@ -1,15 +1,14 @@
 Tables:
 + Users
-+ Highscore
 
 Schema:
-+ Users
-	+ id		INTEGER		PRIMARY KEY
-	+ name		TEXT
++ users
+	+ name		TEXT PRIMARY KEY
 	+ passwd	TEXT
-	+ score		INTEGER
-	+ games		INTEGER
-+ Highscore
-	+ rank		INTEGER		
-	+ user		TEXT		PRIMARY KEY
-	+ score		INTEGER
+	+ highscore	INTEGER
+	+ gamesplayed	INTEGER
+	+ secretsfound	INTEGER
+
+Dummy Users:
+name:	Mickey,		passwd: Mouse
+name:	Goofy,		passwd: take the shot
