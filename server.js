@@ -30,17 +30,20 @@ var db = new sqlite3.Database(db_filename, sqlite3.OPEN_READONLY, (err) => {
 });
 
 app.use(express.static(public_dir));//Handles all of our requests
+app.use(session({secret:"CISC375PinballFinalProject"}));
 
 
-
-app.get("/Titles", (req,res) => {//In JS $.get(/Titles, req, (data) =>{});
-        //console.log(req);
+app.get("/Login", (req,res) => {//In JS $.get(/Titles, req, (data) =>{});
+				if(res.session.username)
+				{
+									
+				//console.log(req);
         var req_url = url.parse(req.url);
         //console.log(req_url);//The thing we want is the query
         var query = decodeURI(req_url.query).replace(/\*/g, '%');;//Decode special characters " " = %20 etc.
         //query.replace(/\*/g, "%");//Wildcard: give me everything with this in the title
         //console.log(query);//Text that we want.
-        db.all("SELECT * FROM Titles WHERE primary_title LIKE ?", [query], (err, rows) =>{//Use ? because of SQL injection prevention
+        db.all("SELECT * FROM users WHERE primary_title LIKE ?", [query], (err, rows) =>{//Use ? because of SQL injection prevention
 //              Use LIKE instead of '=' because of the wildcards
 //              console.log(rows);
                 if(err){//Check if there is a error
@@ -53,6 +56,8 @@ app.get("/Titles", (req,res) => {//In JS $.get(/Titles, req, (data) =>{});
                 }
 
         });
+
+				}
 });
 
 
@@ -63,6 +68,7 @@ app.get("/Titles", (req,res) => {//In JS $.get(/Titles, req, (data) =>{});
 //*********************
 var wss = new WebSocket.Server({server: server});
 var clients = {};
+var rooms = {}
 var client_count = 0;
 var message;
 wss.on('connection', (ws) => {//On connection to client

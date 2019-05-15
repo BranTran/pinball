@@ -1,9 +1,9 @@
-//var app;
-
 var width = 400;
 var height = 500;
 var score;
+var scoreText;
 var ballCount;
+var ballCountText;
 var ball;
 var platforms;
 var offset = 0;
@@ -59,7 +59,6 @@ gameScene.create = function(){
 
   //Setting up static objects
   platforms = this.physics.add.staticGroup();
-  bumpers = this.physics.add.staticGroup();
   //Center of the item (x,y)
 
   //CEILING AND FLOOR
@@ -85,6 +84,7 @@ platforms.create((width-offset),y,'block');
 }
 */
 //Bumpers
+bumpers = this.physics.add.staticGroup();
 bumpers.create(231,241,'star');
 bumpers.create(50,100,'star');
 
@@ -95,13 +95,24 @@ ball.setCircle(7,0,0);//Circle collision
 this.physics.add.collider(ball, platforms);
 this.physics.add.collider(ball, bumpers, hitbumper, null, this);
 //	ball.events.onOutOfBounds.add(ballOut, this);
-}
+
+//score
+scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '16px', fill: '#FFFFFF' });
+ballCountText = this.add.text(width-182, 16, 'Balls Remaining: 3', { fontSize: '16px', fill: '#FFFFFF' });
+
+
+}//CREATE
 
 /************************
         UPDATE
 *************************/
 gameScene.update = function(){
-  var cursors = this.input.keyboard.createCursorKeys();
+  var cursors = this.input.keyboard.addKeys({
+    up: 'up',
+    down: 'down',
+    left: 'left',
+    right: 'right'
+});
   var body = ball.body;
 
   //	if(cursors.up.isDown && ball.body.touching.down)
@@ -135,12 +146,15 @@ function ballOut(){
   ballCount--;
   reset();
   console.log("ball went out of bounds, only "+ballCount+" balls left");
+  ballCountText.setText('Balls Remaining: ' + ballCount);
 }
 function gameOver(){
   console.log("The game is over");
   reset();
   ballCount = 3;
   score = 0;
+  scoreText.setText('Score: ' + score);
+  ballCountText.setText('Balls Remaining: ' + ballCount);
   //SEND A REQUEST HERE
 
 }
@@ -151,11 +165,11 @@ function reset(){
   ball.setVelocityY(0);
 }
 function hitbumper(){
-  var xspeed = ball.body.velocity.x;
-  var yspeed = ball.body.velocity.y;
+  var xspeed = ball.body.velocity.x * 1.5;
+  var yspeed = ball.body.velocity.y * 1.5;
   score += 50;
   console.log("We hit the bumper: score = "+ score+", xspeed = "+ ball.body.velocity.x+", yspeed = "+ball.body.velocity.y);
-//  ball.setVelocity(-xspeed,-yspeed);
+  ball.setVelocity(xspeed,yspeed);
 //  console.log("We hit the bumper: score = "+ score+", xspeed = "+ ball.body.velocity.x+", yspeed = "+ball.body.velocity.y);
   //console.log(ball.toJSON());
 //  console.log(body);
@@ -163,38 +177,23 @@ function hitbumper(){
 
   //  var hope = ball.velocity.x;
   //  console.log("our x speed is "+ hope);
+  scoreText.setText('Score: ' + score);
 }
+var saveX;
+var saveY;
+var paused = 0;
+function togglePause(){
+  if(paused === 1){//We are paused
+    ball.setVelocity(saveX,saveY);
+    ball.body.setAllowGravity(true);
+    paused = 0;
+  }
+  else{
+    saveX = ball.body.velocity.x;
+    saveY = ball.body.velocity.y;
 
-//
-// function Init() {
-//     app = new Vue({
-//         el: "#app",
-//         data: {
-//             movie_search: "",
-//             movie_type: "/Titles",
-//             movie_type_options: [
-//                 {value: "/Titles", text: "Movie/TV Show Title"},
-//                 {value: "/Names", text: "People"}
-//             ],
-//             search_results: []
-//         },
-//         computed: {
-//             input_placeholder: function() {
-//                 if (this.movie_type === "/Titles") {
-//                     return "Search for a Movie/TV Show Title";
-//                 }
-//                 else {
-//                     return "Search for People";
-//                 }
-//             }
-//         }
-//     });
-// }
-//
-// function MovieSearch(event) {
-//     if (app.movie_search !== "") {
-//         $.post(app.movie_type, app.movie_search, (data) => {
-//             app.search_results = data;
-//         }, "json");
-//     }
-// }
+    ball.setVelocity(0,0);
+    ball.body.setAllowGravity(false);
+    paused = 1;
+  }
+}
