@@ -3,19 +3,21 @@
 <html>
   <head>
     <link href = "stylesheet.css" type="text/css" rel="stylesheet">
-
+    <script type="application/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="application/javascript" src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script type="application/javascript" src="scripts/clientserver.js"></script>
     <title>LOGIN</title>
   </head>
-  <body>
+  <body onload="Init();">
     <div class = "box">
       <h1>Galaxy Pinball</h1>
-	<a href="index.html">Game</a>
+	<a href="game.html">Game</a>
       <b>USERNAME</b>
-      <input type="text" placeholder="Enter Username" name = "user" class = "user" required/>
+      <input type="text" placeholder="Enter Username" v-model="username" name = "user" class = "user" required/>
       <b>PASSWORD</b>
-      <input type="text" placeholder="Enter Password" name = "pass" class = "password" required/>
-      <div class="btn">Sign In</div>
-      <div class="btn2">Sign Up</div>
+      <input type="text" placeholder="Enter Password" v-model="password" name = "pass" class = "password" required/>
+      <button type="button" class="btn" @click="SignIn">Sign In</button>
+      <button type="button" class="btn2" @click="SignUp">Sign Up</button>
 
     </div>
   </body>

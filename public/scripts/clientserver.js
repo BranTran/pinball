@@ -4,12 +4,8 @@ function Init() {
   app = new Vue({
     el: "#app",
     data: {
-      movie_search: "",
-      movie_type: "/Titles",
-      movie_type_options: [
-        {value: "/Titles", text: "Movie/TV Show Title"},
-        {value: "/Names", text: "People"}
-      ],
+      username:'',
+      password:'',
       show_type: "search",
       search_results: [],
       selected_item: {},//{} for object
@@ -39,22 +35,48 @@ function MovieSearch(event) {
   }
 }
 
-function GetTitle(title){
-  console.log("GetTitle --> "+title);
-  GetJson(title).then((data) =>{
-    app.selected_item = data;
-    app.show_type = "title";
-    //console.log(data);
-  });
+function SendMessage(){
+  console.log(app.new_message);
+  app.new_message = "";
 }
 
-function GetName(name){
-  console.log("GetName --> "+name);
-  GetJson(name).then((data)=>{
-
-   });
-  // //	}, "json");
+function PlayGame(){
+  console.log("We want to play the game");
+  $.get("/User", (data)=>{
+    app.username= data.username;
+//    app.password= data.password;
+  })
 }
+function SignIn(event){
+  console.log("signin");
+  if(app.username !== "" && app.password !== "")
+  {
+    console.log("Username: "+app.username+" Password: "+app.password);
+    GetJson('/login' + "?" + app.username+"|||"+app.password).then((data)=>{
+      console.log(data);
+    });
+
+  }
+  else{
+    console.log("DID NOT GET IN Username: "+app.username+" Password: "+app.password);
+  }
+}
+function SignUp(event){
+  console.log("signup");
+  if(app.username !== "" && app.password !== "")
+  {
+    console.log("Username: "+app.username+" Password: "+app.password);
+    PostJson('/login' + "?" + app.username+"|||"+app.password).then((data)=>{
+      console.log(data);
+    });
+
+  }
+  else{
+    console.log("DID NOT GET IN SIGNUP Username: "+app.username+" Password: "+app.password);
+  }
+
+}
+
 
 function GetJson(url, query){//Turn jquery get into a promise
   return new Promise((resolve,reject) => {
@@ -64,11 +86,13 @@ function GetJson(url, query){//Turn jquery get into a promise
   });
 }
 
-function SendMessage(){
-  console.log(app.new_message);
-  app.new_message = "";
+function PostJson(url, query){//Turn jquery get into a promise
+  return new Promise((resolve,reject) => {
+    $.post(url, query, (data) => {
+      resolve(data);
+    }, "json");
+  });
 }
-
 document.onkeydown = function(event){
 	if(event.keyCode == 13)
 	{
