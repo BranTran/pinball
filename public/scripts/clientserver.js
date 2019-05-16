@@ -159,7 +159,7 @@ var ball;
 var platforms;
 var offset = 0;
 var blockSize = 40;//Block is 40 px
-var root = 'https://brantran.github.io/pinball/public/';
+//var root = 'https://brantran.github.io/pinball/public/';
 
 
 function InitGame(){
@@ -168,7 +168,7 @@ function InitGame(){
     type: Phaser.AUTO,
     width: width,
     height: height,
-    parent: "pinball_game",//This is for injecting into html
+    parent: "pinball_game",//This doesn't work
     physics: {
       default:'arcade',
       arcade: {
@@ -185,11 +185,12 @@ function InitGame(){
   //        PRELOAD
   gameScene.preload = function(){
     this.load.image('space','assets/space.png');
-    this.load.image('block','assets/40px_black_square.png');
-    this.load.image('LRTri','assets/40px_black_LowRight_triangle.png');
-    this.load.image('URTri','assets/40px_black_UpRight_triangle.png');
-    this.load.image('LLTri','assets/40px_black_LowLeft_triangle.png');
-    this.load.image('ULTri','assets/40px_black_UpLeft_triangle.png');
+    // this.load.image('block','assets/40px_black_square.png');
+    // this.load.image('LRTri','assets/40px_black_LowRight_triangle.png');
+    // this.load.image('URTri','assets/40px_black_UpRight_triangle.png');
+    // this.load.image('LLTri','assets/40px_black_LowLeft_triangle.png');
+    // this.load.image('ULTri','assets/40px_black_UpLeft_triangle.png');
+    this.load.image('floor','assets/100X10_black_rectangle.png');
     this.load.image('pinball','assets/pinball.png');
     this.load.image('star','assets/star.png');
   }
@@ -206,48 +207,30 @@ function InitGame(){
     //Setting up static objects
     platforms = this.physics.add.staticGroup();
     //Center of the item (x,y)
+    //floor
+    platforms.create(25,height-50, 'floor').setScale(2).refreshBody();
+    platforms.create(width-25, height-50,'floor').setScale(2).refreshBody();
+    //Bumpers
+    bumpers = this.physics.add.staticGroup();
+    bumpers.create(231,241,'star');
+    bumpers.create(50,100,'star');
 
-    //CEILING AND FLOOR
-    for(var x = offset; x < width+blockSize; x = x+blockSize)
-    {
-      //    platforms.create(x,offset,'block');//Ceiling
-      if(x < (width/3) || x > (2*width/3))
-      {//Leave a gap in the center
-        platforms.create(x,(height-offset),'block');
-      }
-    }
-    //Walls
-    /*  for(var y = offset; y < height; y = y+(blockSize))
-    {
-    platforms.create(offset,y,'block');
-    if(y >= height/2 - (blockSize) && y <= ((height/2))){
-    platforms.create((width-offset),y,'LRTri');
-  }
-  else{
-  platforms.create((width-offset),y,'block');
-  }
+    //Pinball
+    ball = this.physics.add.sprite((width-(blockSize/4)),(height/2)-(blockSize/2),'pinball').setCollideWorldBounds(true).setBounce(1);
+    ball.setBounce(0.8);
+    ball.setCircle(7,0,0);//Circle collision
+    this.physics.add.collider(ball, platforms);
+    this.physics.add.collider(ball, bumpers, hitbumper, null, this);
 
-  }
-  */
-  //Bumpers
-  bumpers = this.physics.add.staticGroup();
-  bumpers.create(231,241,'star');
-  bumpers.create(50,100,'star');
+    //score
+    scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '16px', fill: '#FFFFFF' });
+    ballCountText = this.add.text(width-92, 16, 'Balls: 3', { fontSize: '16px', fill: '#FFFFFF' });
+    jumpsLeft = this.add.text(124, 16, 'Jump Power: 100', { fontSize: '16px', fill: '#FFFFFF' });
 
-  //Pinball
-  ball = this.physics.add.sprite((width-(blockSize/4)),(height/2)-(blockSize/2),'pinball').setCollideWorldBounds(true).setBounce(1);
-  ball.setBounce(0.8);
-  ball.setCircle(7,0,0);//Circle collision
-  this.physics.add.collider(ball, platforms);
-  this.physics.add.collider(ball, bumpers, hitbumper, null, this);
-  //	ball.events.onOutOfBounds.add(ballOut, this);
-
-  //score
-  scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '16px', fill: '#FFFFFF' });
-  ballCountText = this.add.text(width-182, 16, 'Balls Remaining: 3', { fontSize: '16px', fill: '#FFFFFF' });
-
-
+    jumps = 100;
   }//CREATE
+  var jumps;
+  var jumpsLeft;
   //        UPDATE
   gameScene.update = function(){
     var cursors = this.input.keyboard.addKeys({
@@ -259,84 +242,89 @@ function InitGame(){
     var body = ball.body;
 
     //	if(cursors.up.isDown && ball.body.touching.down)
-    if(cursors.up.isDown)
-    {
-      ball.setVelocityY(-330);
+
+    if(cursors.up.isDown && jumps > 0){
+      ball.setVelocityY(-640);
+      jumps--;
+      jumpsLeft.setText('Jump Power: ' + jumps);
     }
-    if(cursors.left.isDown)
-    {
-      ball.setVelocityX(-160);
+    if(cursors.left.isDown && ball.x > 50){
+      if(ball.body.velocity.x > -160){
+        ball.setVelocityX(-160);
+      }else{
+        ball.setVelocityX(ball.body.velocity.x-5);
+      }
     }
-    if(cursors.right.isDown){
-      ball.setVelocityX(160);
+    if(cursors.right.isDown && ball.x < (width-50)){
+      if(ball.body.velocity.x < 160){
+        ball.setVelocityX(160);
+      }else{
+        ball.setVelocityX(ball.body.velocity.x+5);
+      }
     }
+
+    //FOr when then run out of jumps
+    if(ball.body.touching.down && ball.body.velocity.y > -10 && ball.body.velocity.y < 10){
+      ball.setVelocityY(-500);
+      if(ball.body.velocity.x > -20 && ball.body.velocity.x < 20){
+        ball.setVelocityX((Math.random()*640)-320);
+
+      }
+    }
+
 
     if(ball.y > height)
     {
-      ballOut();
+      this.ballOut();
     }
     if(ballCount < 1)
     {
-      gameOver();
+      this.gameOver();
     }
   }//Update
-}//InitGame()
+  /************************
+  OTHER FUNCTIONS
+  *************************/
+  gameScene.ballOut = function(){
+    ballCount--;
+    this.resetBall();
+    console.log("ball went out of bounds, only "+ballCount+" balls left");
+    ballCountText.setText('Balls: ' + ballCount);
+  }
+  gameScene.gameOver = function(){
+    console.log("The game is over");
+    //  game.scene.switch('gameOver');
+    this.scene.restart();
+    //SEND A REQUEST HERE
+  }
+  gameScene.resetBall = function(){
+    ball.x = width-(blockSize/4);
+    ball.y = (height/2)-(blockSize/2);
+    ball.setVelocityX(0);
+    ball.setVelocityY(0);
+    jumps = 100;
+    jumpsLeft.setText('Jump Power: ' + jumps);
+  }
+  gameScene.hitbumper = function(){
+    var xspeed = ball.body.velocity.x * 1.25;
+    var yspeed = ball.body.velocity.y * 1.25;
+    score += 50;
+    //  console.log("We hit the bumper: score = "+ score+", xspeed = "+ ball.body.velocity.x+", yspeed = "+ball.body.velocity.y);
+    ball.setVelocity(xspeed,yspeed);
 
-/************************
-OTHER FUNCTIONS
-*************************/
-function ballOut(){
-  ballCount--;
-  reset();
-  console.log("ball went out of bounds, only "+ballCount+" balls left");
-  ballCountText.setText('Balls Remaining: ' + ballCount);
-}
-function gameOver(){
-  console.log("The game is over");
-  reset();
-  ballCount = 3;
-  score = 0;
-  scoreText.setText('Score: ' + score);
-  ballCountText.setText('Balls Remaining: ' + ballCount);
-  //SEND A REQUEST HERE
-
-}
-function reset(){
-  ball.x = width-(blockSize/4);
-  ball.y = (height/2)-(blockSize/2);
-  ball.setVelocityX(0);
-  ball.setVelocityY(0);
-}
-function hitbumper(){
-  var xspeed = ball.body.velocity.x * 1.5;
-  var yspeed = ball.body.velocity.y * 1.5;
-  score += 50;
-  console.log("We hit the bumper: score = "+ score+", xspeed = "+ ball.body.velocity.x+", yspeed = "+ball.body.velocity.y);
-  ball.setVelocity(xspeed,yspeed);
-  //  console.log("We hit the bumper: score = "+ score+", xspeed = "+ ball.body.velocity.x+", yspeed = "+ball.body.velocity.y);
-  //console.log(ball.toJSON());
-  //  console.log(body);
-  //  console.log("We hit the bumper: score = "+ score+", xspeed = "+ xspeed+", yspeed = "+yspeed);
-
-  //  var hope = ball.velocity.x;
-  //  console.log("our x speed is "+ hope);
-  scoreText.setText('Score: ' + score);
-}
+    scoreText.setText('Score: ' + score);
+  }
+}//InitGame
 var saveX;
 var saveY;
 var paused = 0;
 function togglePause(){
   if(paused === 1){//We are paused
-    ball.setVelocity(saveX,saveY);
-    ball.body.setAllowGravity(true);
+    gameScene.scene.resume();
     paused = 0;
   }
   else{
-    saveX = ball.body.velocity.x;
-    saveY = ball.body.velocity.y;
-
-    ball.setVelocity(0,0);
-    ball.body.setAllowGravity(false);
+    gameScene.scene.pause();
     paused = 1;
   }
 }
