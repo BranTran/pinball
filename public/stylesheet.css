@@ -103,3 +103,8 @@ b{
   left: 0;
   width: 50vw;
 }
+#app{
+  width: 50vw;
+  height: 100vh;
+  float:left;
+}

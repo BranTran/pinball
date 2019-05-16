@@ -44,7 +44,6 @@
     <div id="login" v-if="page_type === 'login'">
       <div class = "box">
         <h1>Galaxy Pinball</h1>
-        <a href="game.html">Game</a>
         <b>USERNAME</b>
         <input type="text" placeholder="Enter Username" v-model="username" name = "user" class = "user" required/>
         <b>PASSWORD</b>
@@ -58,8 +57,9 @@
     <div id="game" v-if="page_type === 'game'">
       <div id=pinball_game></div>
       <h1>Pinball</h1>
-      <a href="login.html">Login</a>
+      <span @click="LeaderBoard">Leaderboard           </span><span @click="SignOut">Logout</span>
       <br/>
+      <h4>Highscore: {{highscore}}</h4>
       <button type="button" @click="togglePause">Pause</button>
       <div id="interactive">
         <div id="chat container">

@@ -20,14 +20,6 @@ function Init() {
       new_message: ""
     },
     computed: {
-      // input_placeholder: function() {
-      //   if (this.movie_type === "/Titles") {
-      //     return "Search for a Movie/TV Show Title";
-      //   }
-      //   else {
-      //     return "Search for People";
-      //   }
-      // }
     },
     watch: {
       page_type: function (){
@@ -45,14 +37,14 @@ function SendMessage(){
 }
 
 function playGame(){
-  console.log("NEED TO CHANGE PLAYGAME()");
-  app.username = "Goofy";
+//  console.log("NEED TO CHANGE PLAYGAME()");
+//  app.username = "Goofy";
   if(app.username !== "")
   {
     console.log("Let's Play "+app.username+"!");
     app.page_type = "game";
-  }
-  else{
+    app.page_type = "game";
+  }  else{
     console.log("Please login/sign up before playing");
     app.page_type ="login";
   }
@@ -64,13 +56,22 @@ function SignIn(event){
     console.log("Username: "+app.username+" Password: "+app.password);
     GetJson('/login' + "?" + app.username+"|||"+app.password).then((data)=>{
       console.log(data);
-      app.username = data.name;
-      app.highscore = data.highscore;
-      app.gamesplayed = data.gamesplayed;
-      app.secretsfound = data.secretsfound;
-      app.page_type = "game";
+      if(data.found_user === 1){
+        if(data.goodpassword === 1)
+        {
+          app.username = data.name;
+          app.highscore = data.highscore;
+          app.gamesplayed = data.gamesplayed;
+          app.secretsfound = data.secretsfound;
+          app.page_type = "game";
+        }else{
+          alert('incorrect password');
+          app.password = "";
+        }
+      }else{
+        alert('No user with this username');
+      }
     });
-
   }
   else{
     if(app.username === ""){
@@ -83,23 +84,45 @@ function SignIn(event){
 }
 function SignUp(event){
   console.log("signup");
-  if(app.username !== "" && app.password !== "")
-  {
+  if(app.username !== "" && app.password !== ""){
     console.log("Username: "+app.username+" Password: "+app.password);
     PostJson('/login' + "?" + app.username+"|||"+app.password).then((data)=>{
-      app.username = data.name;
-      app.highscore = data.highscore;
-      app.gamesplayed = data.gamesplayed;
-      app.secretsfound = data.secretsfound;
-      app.page_type = "game";
+      console.log(data);
+      if(data.inserted == 1){
+        console.log("Successfully created a new user");
+        app.highscore = 0;
+        app.gamesplayed = 0;
+        app.secretsfound = 0;
+        app.page_type = "game";
+      }else{
+        alert("Username already exists");
+        app.username = "";
+        app.password = "";
+      }
     });
   }
   else{
-    console.log("DID NOT GET IN SIGNUP Username: "+app.username+" Password: "+app.password);
+    if(app.username === ""){
+      alert("Please enter your username");
+    }
+    if(app.password === ""){
+      alert("Please enter your password");
+    }
   }
+}//SignUp
+function LeaderBoard(){
+gameScene.gameOver();
+  app.page_type = 'main';
+  $("canvas").remove();
+}
+function SignOut(){
+gameScene.gameOver();
+  app.page_type = 'main';
+  app.username = '';
+  app.password = '';
+  $("canvas").remove();
 
 }
-
 
 function GetJson(url, query){//Turn jquery get into a promise
   return new Promise((resolve,reject) => {
@@ -159,12 +182,16 @@ var ball;
 var platforms;
 var offset = 0;
 var blockSize = 40;//Block is 40 px
+var jumps;
+var jumpsLeft;
 //var root = 'https://brantran.github.io/pinball/public/';
-
+var gameScene;
+var game;
 
 function InitGame(){
-  var gameScene = new Phaser.Scene
+  gameScene = new Phaser.Scene
   var config = {
+    key:"game",
     type: Phaser.AUTO,
     width: width,
     height: height,
@@ -180,7 +207,7 @@ function InitGame(){
     scene: gameScene
   };
 
-  var game = new Phaser.Game(config);
+  game = new Phaser.Game(config);
 
   //        PRELOAD
   gameScene.preload = function(){
@@ -212,15 +239,18 @@ function InitGame(){
     platforms.create(width-25, height-50,'floor').setScale(2).refreshBody();
     //Bumpers
     bumpers = this.physics.add.staticGroup();
-    bumpers.create(231,241,'star');
-    bumpers.create(50,100,'star');
+    bumpers.create(200,100,'star');
+    bumpers.create(75,186,'star');
+    bumpers.create(width-75,186,'star');
+    bumpers.create(133,325,'star');
+    bumpers.create(266,325,'star');
 
     //Pinball
     ball = this.physics.add.sprite((width-(blockSize/4)),(height/2)-(blockSize/2),'pinball').setCollideWorldBounds(true).setBounce(1);
     ball.setBounce(0.8);
     ball.setCircle(7,0,0);//Circle collision
     this.physics.add.collider(ball, platforms);
-    this.physics.add.collider(ball, bumpers, hitbumper, null, this);
+    this.physics.add.collider(ball, bumpers, this.hitbumper, null, this);
 
     //score
     scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '16px', fill: '#FFFFFF' });
@@ -229,8 +259,6 @@ function InitGame(){
 
     jumps = 100;
   }//CREATE
-  var jumps;
-  var jumpsLeft;
   //        UPDATE
   gameScene.update = function(){
     var cursors = this.input.keyboard.addKeys({
@@ -273,13 +301,12 @@ function InitGame(){
     }
 
 
-    if(ball.y > height)
-    {
+    if(ball.y > height){
       this.ballOut();
     }
-    if(ballCount < 1)
-    {
+    if(ballCount < 1){
       this.gameOver();
+      this.restartGame();
     }
   }//Update
   /************************
@@ -291,11 +318,12 @@ function InitGame(){
     console.log("ball went out of bounds, only "+ballCount+" balls left");
     ballCountText.setText('Balls: ' + ballCount);
   }
-  gameScene.gameOver = function(){
-    console.log("The game is over");
-    //  game.scene.switch('gameOver');
-    this.scene.restart();
-    //SEND A REQUEST HERE
+  gameScene.restartGame = function(){
+    this.resetBall();
+    score = 0;
+    ballCount = 3;
+    scoreText.setText("Score: "+score);
+    ballCountText.setText("Balls: "+ballCount);
   }
   gameScene.resetBall = function(){
     ball.x = width-(blockSize/4);
@@ -315,6 +343,23 @@ function InitGame(){
     scoreText.setText('Score: ' + score);
   }
 }//InitGame
+gameScene.gameOver = function(){
+  console.log("The game is over");
+  if(score > app.highscore){
+    console.log("Score is bigger than the app highscore: "+app.highscore);
+    app.highscore = score;
+    PostJson('/update?'+ app.username+"|||"+app.highscore).then((data)=>{
+      if(data === undefined){
+        console.log("New HIGH SCORE!!!: "+app.highscore);
+      }
+      else{
+        console.log(data);
+      }
+
+    });
+    console.log("highscore is now: "+app.highscore);
+  }
+}
 var saveX;
 var saveY;
 var paused = 0;

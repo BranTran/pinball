@@ -12,3 +12,4 @@ Schema:
 Dummy Users:
 name:	Mickey,		passwd: Mouse
 name:	Goofy,		passwd: take the shot
+name:	Pete,		passwd: Bad Guy
