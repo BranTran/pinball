@@ -22,41 +22,24 @@ var db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
 	}
 	else{
 		console.log("Now connected to "+ db_filename);
-		//Technially all the code would go in here
-		//We worry about asycn issues, but in the end
-		//The chances of an issue are so small
 	}
 });
 
 app.use(express.static(public_dir));//Handles all of our requests
-//app.use(session({secret:"CISC375PinballFinalProject"}));
 
-
-app.get("/User", (req,res) => {//LOGIN
-	//	if(res.session.username){
-	//		res.redirect('login');
-	//	}
-	//	else {
-	//		res.redirect('signup');
-	//	}
-});
-app.get('/login', (req,res)=>{//Login
+app.get("/login", (req,res)=>{//Login
 	var req_url = url.parse(req.url);//give username and password;
 	console.log(req_url);//The thing we want is the query
-	var query = decodeURI(req_url.query).replace(/\*/g, '%');;//Decode special characters " " = %20 etc.
+	var query = decodeURI(req_url.query).replace(/\*/g, "%");;//Decode special characters " " = %20 etc.
 	var splitQuery = query.split("|||");
 	var username = splitQuery[0];
 	var password = splitQuery[1];
 	var password = md5(password);//Encrypt the password
 	console.log("Username: "+username+" Password: "+password);
-	//query.replace(/\*/g, "%");//Wildcard: give me everything with this in the title
-	//console.log(query);//Text that we want.
 	console.log("SELECT * FROM users WHERE name = ?"+username);
 	db.get("SELECT * FROM users WHERE name = ?",[username], (err, row) =>{//Use ? because of SQL injection prevention
-		// Use LIKE instead of '=' because of the wildcards
-		//		console.log(row);
 		if(err){//Check if there is a error
-			console.log('there was an error');
+			console.log("there was an error");
 			res.writeHead(500, {"Content-Type": "test/plain"});
 			res.write(JSON.stringify(problem));
 			res.end();
@@ -80,13 +63,13 @@ app.get('/login', (req,res)=>{//Login
 			res.end();
 		}
 	});//db
-
-
 });
-app.post('/login',(req,res)=>{//NEW USER
+
+
+app.post("/login",(req,res)=>{//NEW USER
 	var req_url = url.parse(req.url);//give username and password;
 	console.log(req_url);//The thing we want is the query
-	var query = decodeURI(req_url.query).replace(/\*/g, '%');;//Decode special characters " " = %20 etc.
+	var query = decodeURI(req_url.query).replace(/\*/g, "%");;//Decode special characters " " = %20 etc.
 	var splitQuery = query.split("|||");
 	var username = splitQuery[0];
 	var password = splitQuery[1];
@@ -95,7 +78,7 @@ app.post('/login',(req,res)=>{//NEW USER
 	db.get("SELECT * FROM users WHERE name = ?",[username], (err, row) =>{//Use ? because of SQL injection prevention
 		console.log("Inside initial select search");
 		if(err){//Check if there is a error
-			console.log('there was an error');
+			console.log("there was an error");
 			res.writeHead(500, {"Content-Type": "test/plain"});
 			res.write("There was an error");
 			res.end();
@@ -106,9 +89,8 @@ app.post('/login',(req,res)=>{//NEW USER
 				console.log("Did not find it in rows so new user: "+username+" and password: "+password);
 				var sql = "INSERT INTO users VALUES(?,?,?,?,?)";
 				db.all(sql,[username,password,0,0,0], (inserterr,nothing) => {//Use ? because of SQL injection prevention
-					// Use LIKE instead of '=' because of the wildcards
 					console.log("Ran insert, doing callback function");
-    			if(inserterr){//Check if there is a error
+					if(inserterr){//Check if there is a error
 						console.log(inserterr);
 						res.writeHead(501, {"Content-Type": "text/plain"});
 						res.write("Failed to have things working");
@@ -134,10 +116,10 @@ app.post('/login',(req,res)=>{//NEW USER
 	});
 });
 
-app.post('/update',(req,res)=>{//NEW USER
+app.post("/update",(req,res)=>{//NEW USER
 	var req_url = url.parse(req.url);//give username and password;
 	console.log(req_url);//The thing we want is the query
-	var query = decodeURI(req_url.query).replace(/\*/g, '%');;//Decode special characters " " = %20 etc.
+	var query = decodeURI(req_url.query).replace(/\*/g, "%");;//Decode special characters " " = %20 etc.
 	var splitQuery = query.split("|||");
 	var username = splitQuery[0];
 	var score = splitQuery[1];
@@ -145,7 +127,7 @@ app.post('/update',(req,res)=>{//NEW USER
 	db.run("UPDATE users SET highscore = "+score+" WHERE name = ?",[username], (err, row) =>{//Use ? because of SQL injection prevention
 		console.log("Inside initial select search");
 		if(err){//Check if there is a error
-			console.log('there was an error');
+			console.log("there was an error");
 			res.writeHead(500, {"Content-Type": "test/plain"});
 			res.write("There was an error");
 			res.end();
@@ -164,47 +146,74 @@ app.post('/update',(req,res)=>{//NEW USER
 
 
 
-	//*********************
-	// 	WEB SOCKET
-	//*********************
-	// var wss = new WebSocket.Server({server: server});
-	// var clients = {};
-	// var rooms = {}
-	// var client_count = 0;
-	// var message;
-	// wss.on('connection', (ws) => {//On connection to client
-	//     var client_id = ws._socket.remoteAddress + ":" + ws._socket.remotePort;//IPAddre$
-	//
-	//     console.log('New connection: ' + client_id);
-	//     clients[client_id] = ws;
-	//     client_count++;//Increment on connection
-	//
-	//     ws.on('message', (message) => {
-	//         console.log('Message from ' + client_id + ': ' + message);
-	//     });
-	//     ws.on('close', () => {
-	//         console.log('Client disconnected: ' + client_id);
-	//         delete clients[client_id];
-	//         client_count--;//Decrement on close
-	//
-	//         message = {msg: 'delete_client', data: client_count};
-	//         for (id in clients) {
-	//                 if (clients.hasOwnProperty(id)) {
-	//                         clients[id].send(JSON.stringify(message));
-	//                 }
-	//         }
-	//     });
-	//     var id;
-	//     message = {msg: 'client_count', data: client_count};
-	//     for (id in clients) {
-	//         if (clients.hasOwnProperty(id)) {
-	//
-	//             clients[id].send(JSON.stringify(message));//Send message to all clients $
-	//         }
-	//     }
-	// });//Connection success
+/*********************
+WEB SOCKET
+*********************/
+var wss = new WebSocket.Server({server: server});
+var clients = [];
+var client_count = 0;
+var message;
+var chat_history = [];
+wss.on("connection", (ws) => {//On connection to client
+	var client_id = ws._socket.remoteAddress + ":" + ws._socket.remotePort;//IPAddress and port
+	console.log("New connection: " + client_id);
+	clients.push(ws);
+	client_count++;//Increment on connection
+	ws.room = "";
+	ws.on("message", (message) => {
+		var messag = JSON.parse(message); //{type,data}
+		if(messag.type === "username"){//They send username
+			ws.username = messag.data;
+			console.log("Username:"+ws.username);
+		}else if(messag.type ==="roomname"){
+			ws.room = messag.data;
+			console.log("Roomname: "+ws.room);
+//			broadcast(JSON.stringify({type:"roommate",data:"username"}));
+		}
+		else if(messag.type === "msg"){//They are sending text
+			console.log("Message from " + client_id + "("+messag.data.sender+"): " + messag.data.text +"|END");
+			chat_history.push(messag.data);//Sending only the data
+			broadcast(message);//Send message to everone in room
+		}
+	});//on message
+	ws.on("close", () => {
+		console.log("Client disconnected: " + client_id);
+		delete clients[client_id];
+		client_count--;//Decrement on close
+		//Send the message to everyone
+	});
+	SendChatHistory(ws);
+});//Successful connection to server
 
+//IF IT'S THE SAME MAKE A FUNCTION
+//
+function updateClientCount(){
+	var id;
+	message = {type: "client_count", data: client_count};//CLIENT COUNT IS A GLOBAL VARIABLE
+	Broadcast(JSON.stringify(message));
+}//*/
 
-	//var server = app.listen(port);//OLD
-	server.listen(port, '0.0.0.0');//websocketing webserver
-	console.log("Now listening on port "+port);
+function broadcast(message){//This is an object
+	clients.forEach((client)=>{
+		console.log(client.room);
+		if(client.room.indexOf(JSON.parse(message).data.room)>-1){
+			console.log("Sending "+message+" to "+client.username);
+			client.send(message);
+		}
+	});
+}
+
+function SendChatHistory(ws){
+	console.log("We are sending chat history");
+	var room_specific_chat = [];
+	chat_history.forEach((message)=>{
+		if(message.room == ws.room){
+			room_specific_chat.push(message);
+		}
+	});
+	var history = {type:"history", data: room_specific_chat};
+	ws.send(JSON.stringify(history));
+}
+
+server.listen(port, "0.0.0.0");//websocketing webserver
+console.log("Now listening on port "+port);

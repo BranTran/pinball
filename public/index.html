@@ -13,7 +13,7 @@
 <body onload="Init();">
   <div id="app">
     <!-- MAIN PAGE     -->
-    <div vclass = "box2" v-if="page_type === 'main'">
+    <div class = "box2" v-if="page_type === 'main'">
       <b>Username:</b>
       <b>High Score:</b>
       <b>Games Played:</b>
@@ -47,7 +47,9 @@
         <b>USERNAME</b>
         <input type="text" placeholder="Enter Username" v-model="username" name = "user" class = "user" required/>
         <b>PASSWORD</b>
-        <input type="text" placeholder="Enter Password" v-model="password" name = "pass" class = "password" required/>
+        <input type="password" placeholder="Enter Password" v-model="password" name = "pass" class = "password" required/>
+        <b>ROOM NAME</b>
+        <input type="text" placeholder="Enter Room Name" v-model="room" name = "room" class = "room" required/>
         <button type="button" class="btn" @click="SignIn">Sign In</button>
         <button type="button" class="btn2" @click="SignUp">Sign Up</button>
       </div>
@@ -57,15 +59,17 @@
     <div id="game" v-if="page_type === 'game'">
       <div id=pinball_game></div>
       <h1>Pinball</h1>
-      <span @click="LeaderBoard">Leaderboard           </span><span @click="SignOut">Logout</span>
+      <span @click="LeaderBoard">Leaderboard</span><span @click="SignOut">Logout</span>
       <br/>
+      <h4>Player: {{username}}</h4>
       <h4>Highscore: {{highscore}}</h4>
       <button type="button" @click="togglePause">Pause</button>
       <div id="interactive">
         <div id="chat container">
-          <table id="chat">
+          <h5>Room Name {{room}}</h5>
+          <table id="chat" v-if="chat_messages.length !== 0">
             <tr v-for="things in chat_messages">
-              <td>{{things.sender}}: {{things.msg}}</td>
+              <td>{{things.sender}}:</td><td>{{things.text}}</td>
             </tr>
           </table>
           <input type="text" placeholder="Enter message..." v-model="new_message"/>
