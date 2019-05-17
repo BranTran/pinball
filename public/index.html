@@ -14,9 +14,9 @@
   <div id="app">
     <!-- MAIN PAGE     -->
     <div class = "box2" v-if="page_type === 'main'">
-      <b>Username:</b>
-      <b>High Score:</b>
-      <b>Games Played:</b>
+      <b>Username: {{username}}</b></br>
+      <b>High Score: {{highscore}}</b></br>
+      <b>Games Played: {{gamesplayed}}</b></br>
       <div id="leaderboard" class="container">
         <!-- scores will be inserted by the script here -->
         <table>
@@ -30,7 +30,6 @@
           </tr>
         </table>
       </div>
-      <b>Change Profile Picture:</b>
       <h1 @click="playGame">PLAY</h1>
     </div>
     <!-- STATS PAGE -->
@@ -59,7 +58,8 @@
     <div id="game" v-if="page_type === 'game'">
       <div id=pinball_game></div>
       <h1>Pinball</h1>
-      <span @click="LeaderBoard">Leaderboard</span><span @click="SignOut">Logout</span>
+      <span @click="SignOut">Logout</span></br>
+      <span @click="LeaderBoard">Leaderboard</span>
       <br/>
       <h4>Player: {{username}}</h4>
       <h4>Highscore: {{highscore}}</h4>
