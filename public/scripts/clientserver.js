@@ -10,13 +10,14 @@ function Init() {
     data: {
       username:"",
       password:"",
-      page_type: "main",//main, login, game,stats
-      leader_board:[{name: "Goofy", score:7500},
-      {name: "Player 1", score: 300},
-      {name: "Player 2", score: 370},
-      {name: "Player 3", score: 500},
-      {name: "Player 4", score: 430},
-      {name: "Player 5", score: 340}],
+      page_type: "main",//main, login, game,stats, leader
+      // leader_board:[{name: "Goofy", score:7500},
+      // {name: "Player 1", score: 300},
+      // {name: "Player 2", score: 370},
+      // {name: "Player 3", score: 500},
+      // {name: "Player 4", score: 430},
+      // {name: "Player 5", score: 340}],
+      leader_board:[],
       selected_user:{},
       roommates:[],
       room:"",
@@ -149,9 +150,24 @@ function SignUp(event){
   }
 }//SignUp
 function LeaderBoard(){
-  gameScene.gameOver();
-  app.page_type = "main";
-  $("canvas").remove();
+  if(app.page_type === 'game'){
+    gameScene.gameOver();
+    $("canvas").remove();
+  }
+  GetJson("/leader").then((data)=>{
+    console.log(data);
+    var top10;
+    if(data.length>10){
+      top10 = data.slice(0,10);//inclusive start exclusive end
+    }else{top10 = data}
+    for(var i = 0; i < top10.length; i++){
+      top10[i].rank = i+1;
+    }
+    app.leader_board = top10;
+
+  });
+
+  app.page_type = "leader";
 }
 function SignOut(){
   gameScene.gameOver();
@@ -162,48 +178,57 @@ function SignOut(){
   app.room = "";
   app.chat_messages = [];
   $("canvas").remove();
-
 }
 
-function GetJson(url, query){//Turn jquery get into a promise
-  return new Promise((resolve,reject) => {
-    $.get(url, query, (data) => {
-      resolve(data);
-    }, "json");
+function GetName(name){
+  console.log("GetName --> "+name);
+  GetJson(name).then((data)=>{
+    console.log("selected user will be "+data);
+    app.selected_user = data;
+    console.log("Turns out that selected user is "+app.selected_user)
   });
+  app.page_type = "stats";
 }
 
-function PostJson(url, query){//Turn jquery get into a promise
-  return new Promise((resolve,reject) => {
-    $.post(url, query, (data) => {
-      resolve(data);
-    }, "json");
-  });
-}
-document.onkeydown = function(event){
-  if(event.keyCode == 13 && app.page_type==="game"){
-    SendMessage();
+  function GetJson(url, query){//Turn jquery get into a promise
+    return new Promise((resolve,reject) => {
+      $.get(url, query, (data) => {
+        resolve(data);
+      }, "json");
+    });
   }
-  if(event.keyCode == 13 && app.page_type==="login"){
-    SignIn();
+
+  function PostJson(url, query){//Turn jquery get into a promise
+    return new Promise((resolve,reject) => {
+      $.post(url, query, (data) => {
+        resolve(data);
+      }, "json");
+    });
   }
-}
+  document.onkeydown = function(event){
+    if(event.keyCode == 13 && app.page_type==="game"){
+      SendMessage();
+    }
+    if(event.keyCode == 13 && app.page_type==="login"){
+      SignIn();
+    }
+  }
 
 
 
 
-/************************
-Leader BOard
-************************/
+  /************************
+  Leader BOard
+  ************************/
 
-function updateLeaderboardView() {
-  app.leader_board.sort(function(a, b){ return b.score - a.score  });
-  for(var i = 0; i < app.leader_board.length; i++)
-  app.leader_board[i].rank = i;
-  /*    let colors = ["gold", "silver", "#cd7f32"];
-  for(let i=0; i < 3; i++) {
-  elements[i].style.color = colors[i];
-}*/
+  function updateLeaderboardView() {
+    app.leader_board.sort(function(a, b){ return b.score - a.score  });
+    for(var i = 0; i < app.leader_board.length; i++)
+    app.leader_board[i].rank = i;
+    /*    let colors = ["gold", "silver", "#cd7f32"];
+    for(let i=0; i < 3; i++) {
+    elements[i].style.color = colors[i];
+  }*/
 
 }
 
@@ -380,20 +405,24 @@ gameScene.hitbumper = function(){
   scoreText.setText("Score: " + score);
 }
 gameScene.gameOver = function(){
-  console.log("The game is over");
+  console.log("The game is over. Final score:"+score);
+  app.gamesplayed += 1;
   if(score > app.highscore){
     console.log("Score is bigger than the app highscore: "+app.highscore);
     updateHighscore(score);
-    PostJson("/update?"+ app.username+"|||"+app.highscore).then((data)=>{
+    PostJson("/update?"+ app.username+"|||"+app.highscore+"|||"+app.gamesplayed).then((data)=>{
       if(data === undefined){
         console.log("New HIGH SCORE!!!: "+app.highscore);
       }
       else{
         console.log(data);
       }
-
     });
     console.log("highscore is now: "+app.highscore);
+  }else{
+    PostJson("/update?"+ app.username+"|||"+app.gamesplayed).then((data)=>{
+        console.log("Updated games played to "+app.gamesplayed);
+    });
   }
 }
 var saveX;

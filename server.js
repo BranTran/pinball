@@ -121,11 +121,15 @@ app.post("/update",(req,res)=>{//NEW USER
 	console.log(req_url);//The thing we want is the query
 	var query = decodeURI(req_url.query).replace(/\*/g, "%");;//Decode special characters " " = %20 etc.
 	var splitQuery = query.split("|||");
+	console.log(splitQuery);
 	var username = splitQuery[0];
-	var score = splitQuery[1];
-	console.log("Username: "+username+" Score: "+score);
-	db.run("UPDATE users SET highscore = "+score+" WHERE name = ?",[username], (err, row) =>{//Use ? because of SQL injection prevention
-		console.log("Inside initial select search");
+	var games = splitQuery[1];
+	var sql = "UPDATE users SET gamesplayed = "+games+" WHERE name = ?"
+	if(splitQuery.length > 2){
+		var score = splitQuery[2];
+		sql = "UPDATE users SET gamesplayed = "+games+", highscore = "+score+" WHERE name = ?"
+	}
+	db.run(sql,[username], (err, row) =>{//Use ? because of SQL injection prevention
 		if(err){//Check if there is a error
 			console.log("there was an error");
 			res.writeHead(500, {"Content-Type": "test/plain"});
@@ -133,7 +137,7 @@ app.post("/update",(req,res)=>{//NEW USER
 			res.end();
 		}
 		else{
-			console.log("Sending response");
+			console.log("Sending update");
 			var send = {sending:score};
 			res.writeHead(200, {"Content-Type": "application/json"});
 			res.write(JSON.stringify(send));
@@ -143,8 +147,37 @@ app.post("/update",(req,res)=>{//NEW USER
 });
 
 
-
-
+app.get("/leader", (req,res)=>{//Login
+	console.log("SELECT * FROM users");
+	db.all("SELECT highscore,name FROM users ORDER BY highscore DESC",(err, rows) =>{//Use ? because of SQL injection prevention
+		if(err){//Check if there is a error
+			console.log("Getting leaderboard: there was an error");
+			res.writeHead(500, {"Content-Type": "test/plain"});
+			res.write(JSON.stringify(problem));
+			res.end();
+		}
+		else{
+			console.log(rows);
+			res.writeHead(200, {"Content-Type": "application/json"});
+			res.write(JSON.stringify(rows));
+			res.end();
+		}
+	});//db
+});//leaderboard
+app.get('/names/:name', (req,res)=>{
+	console.log(req.params);
+	db.get('SELECT * FROM users Names WHERE name= ?',[req.params.name],(err, rows)=> {
+	if(err){//Check if there is a error
+		res.writeHead(500, {"Content-Type": "text/plain"});
+		res.end();
+	}else{
+		console.log(rows);
+		res.writeHead(200, {"Content-Type": "application/json"});
+		res.write(JSON.stringify(rows));
+		res.end();
+	}
+	});//use to get first row.
+});
 
 /*********************
 WEB SOCKET

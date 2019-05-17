@@ -14,29 +14,37 @@
   <div id="app">
     <!-- MAIN PAGE     -->
     <div class = "box2" v-if="page_type === 'main'">
-      <b>Username: {{username}}</b></br>
-      <b>High Score: {{highscore}}</b></br>
-      <b>Games Played: {{gamesplayed}}</b></br>
-      <div id="leaderboard" class="container">
-        <!-- scores will be inserted by the script here -->
-        <table>
-          <tr>
-            <td> User </td>
-            <td> Score </td>
-          </tr>
-          <tr v-for="ranker in leader_board">
-            <td><span class="text-primary" :onclick="'GetName(\'/names/'+ranker.name+'\');'">{{ranker.name}}</span></td>
-            <td>{{ranker.score}}</td>
-          </tr>
-        </table>
-      </div>
       <h1 @click="playGame">PLAY</h1>
+      <h1 @click="LeaderBoard">Leader Board</h1>
     </div>
+    <div v-if="page_type === 'leader'">
+      <!-- <b>Username: {{username}}</b></br>
+      <b>High Score: {{highscore}}</b></br>
+      <b>Games Played: {{gamesplayed}}</b></br> -->
+    <div id="leaderboard" class="container">
+      <!-- scores will be inserted by the script here -->
+      <table>
+        <tr>
+          <td> Rank </td>
+          <td> User </td>
+          <td> Score </td>
+        </tr>
+        <tr v-for="ranker in leader_board">
+          <td>{{ranker.rank}}</td>
+          <td><span class="text-primary" :onclick="'GetName(\'/names/'+ranker.name+'\');'">{{ranker.name}}</span></td>
+          <td>{{ranker.highscore}}</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+
     <!-- STATS PAGE -->
     <div vclass = "box2" v-if="page_type === 'stats'">
-      <b>Username:{{selected_user.name}}</b>
-      <b>High Score:{{selected_user.score}}</b>
-      <b>Games Played:{{selected_user.games}}</b>
+
+      <b>Username:{{selected_user.name}}</b><br/>
+      <b>High Score:{{selected_user.highscore}}</b><br/>
+      <b>Games Played:{{selected_user.gamesplayed}}</b><br/>
       <button @click="playGame">PLAY</button>
     </div>
     <!-- LOGIN -->
