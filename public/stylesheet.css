@@ -1,6 +1,7 @@
 body{
   font-family: 'Open Sans', sans-serif;
   /* background-image: url(assets/space.png); */
+  background-color: #a0deef;
   margin: 0 auto 0 auto;
   width:100%;
   text-align:center;
@@ -16,10 +17,13 @@ p{
 h1{
   font-size: 1.5em;
   color:#525252;
+
 }
 
 b{
   color:#525252;
+  float: left;
+  padding-left: 10px;
 }
 
 .box{
