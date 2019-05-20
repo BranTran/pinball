@@ -10,7 +10,7 @@ function Init() {
     data: {
       username:"",
       password:"",
-      page_type: "main",//main, login, game,stats, leader
+      page_type: "main",//main, login, game,stats, leader, about
       // leader_board:[{name: "Goofy", score:7500},
       // {name: "Player 1", score: 300},
       // {name: "Player 2", score: 370},
@@ -66,6 +66,10 @@ function SendMessage(){
   console.log("Message packaged like this: "+message);
   ws.send(JSON.stringify(message));
   app.new_message = "";
+}
+
+function About(){
+  app.page_type = "about"
 }
 
 function playGame(){
