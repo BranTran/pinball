@@ -16,6 +16,7 @@
     <div class = "box2" v-if="page_type === 'main'">
       <h1 @click="playGame">PLAY</h1>
       <h1 @click="LeaderBoard">Leader Board</h1>
+      <h1 @click="About">About</h1>
     </div>
     <div v-if="page_type === 'leader'">
       <!-- <b>Username: {{username}}</b></br>
@@ -37,7 +38,18 @@
       </table>
     </div>
   </div>
+    <!-- about PAGE -->
+    <div vclass = "box2" v-if="page_type === 'about'">
+      <video width="320" height="240" controls>
+        <source src="assets/pinballdemo.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+      <p>Our application is a take on the classic arcade game pinball. In our version we used the phaser
+        framework, aswell as jQuery and node.js to develope the web app. The application takes advantage
+        of phaser for its physics engine and other gameplay elements, while jQuery and Node are used for
+        server side methods. Developed by Brandon Tran and Kyzr Snapko</p>
 
+    </div>
 
     <!-- STATS PAGE -->
     <div vclass = "box2" v-if="page_type === 'stats'">
